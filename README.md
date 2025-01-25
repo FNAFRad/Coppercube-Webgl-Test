@@ -1,4 +1,4 @@
 # Coppercube-Webgl-Test
 A Test to see if Coppercube Games could run!
-Live Demo: https://fnafrad.github.io/Coppercube-Webgl-Test/
-Enjoy :)
+<h1>Live Demo: https://fnafrad.github.io/Coppercube-Webgl-Test/</h1>
+<h2>Enjoy :)</h2>
