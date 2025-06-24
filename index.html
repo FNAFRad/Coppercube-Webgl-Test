@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>KaiOS 3D</title>
+	<script type="text/javascript" src="copperlichtdata/copperlicht.js"></script>
+	  <style>
+    /* Remove default margins/padding and fill viewport */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden; /* no scrolling */
+      background-color: black;
+    }
+	  </style>
+</head>
+<body>
+	<div align="center">
+		<canvas id="3darea" width="240" height="320" style="background-color:#000000">
+		</canvas>
+	</div>
+	<script type="text/javascript">
+	<!--
+			startCopperLichtFromFile('3darea', 'copperlichtdata/index.ccbz', 'Loading $PROGRESS$...<br/><br/><img style="max-width:50%" src="copperlichtdata/coppercubeloadinglogo.png" />', 'Error: This browser does not support WebGL (or it is disabled).<br/>See <a href=\"http://www.ambiera.com/copperlicht/browsersupport.html\">here</a> for details.', false, true, "#000000");
+	-->
+	</script>
+	<br/>
+</body>
+</html>
