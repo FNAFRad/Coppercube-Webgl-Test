@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Coppercube WebGL Test</title>
+  <title>Juicy GO! 3D - Interrupt Handling</title>
   <script type="text/javascript" src="copperlichtdata/copperlicht.js"></script>
   <style>
     html, body {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
       background-color: black;
     }
@@ -24,12 +26,14 @@
   <canvas id="3darea"></canvas>
 
   <script>
+    let gamePaused = false;
+
+
     function resizeCanvas() {
       const canvas = document.getElementById('3darea');
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      // Stretch canvas to fill entire viewport (ignore aspect ratio)
       canvas.style.width = vw + 'px';
       canvas.style.height = vh + 'px';
 
@@ -38,12 +42,57 @@
       canvas.height = vh * dpr;
     }
 
-    window.addEventListener('resize', () => {
-      resizeCanvas();
+    // Pause the game: freeze animations and game logic
+    function pauseGame() {
+      if (!gamePaused) {
+        gamePaused = true;
+        console.log("Game paused");
+        // Example of pausing the CopperLicht engine (you'll need to adapt it to your game logic)
+        // copperLichtEngine.pause();
+      }
+    }
+
+    // Resume the game: resume animations and game logic
+    function resumeGame() {
+      if (gamePaused) {
+        gamePaused = false;
+        console.log("Game resumed");
+        // Example of resuming the CopperLicht engine (you'll need to adapt it)
+        // copperLichtEngine.play();
+      }
+    }
+
+    // Handle app visibility change (e.g., app is in background or foreground)
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        pauseGame();  // Pause when app goes to the background
+      } else {
+        resumeGame();  // Resume when app comes to the foreground
+      }
     });
 
-    window.addEventListener('load', () => {
-      resizeCanvas();
+    // Handle window focus/blur events (e.g., switching to another tab)
+    window.addEventListener('blur', function() {
+      pauseGame();  // Pause when the app loses focus
+    });
+
+    window.addEventListener('focus', function() {
+      resumeGame();  // Resume when the app gains focus
+    });
+
+    // Handle window unload event (e.g., when user exits the app)
+    window.addEventListener('beforeunload', function() {
+      pauseGame();  // Pause the game before the page is unloaded
+    });
+
+    // Handle window resizing
+    window.addEventListener('resize', function() {
+      resizeCanvas();  // Resize canvas when the window is resized
+    });
+
+    window.addEventListener('load', function() {
+      resizeCanvas();  // Initialize canvas size on load
+      // Start your CopperLicht game engine or whatever you’re using
       startCopperLichtFromFile(
         '3darea',
         'copperlichtdata/index.ccbz',
@@ -54,6 +103,7 @@
         "#000000"
       );
     });
+
   </script>
 </body>
 </html>
