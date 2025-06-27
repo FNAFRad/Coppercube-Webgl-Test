@@ -1,32 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>KaiOS 3D</title>
-	<script type="text/javascript" src="copperlichtdata/copperlicht.js"></script>
-	  <style>
-    /* Remove default margins/padding and fill viewport */
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coppercube WebGL Test</title>
+  <script type="text/javascript" src="copperlichtdata/copperlicht.js"></script>
+  <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden; /* no scrolling */
+      margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
       background-color: black;
     }
-	  </style>
+    canvas {
+      display: block;
+      width: 100vw !important;
+      height: 100vh !important;
+      background-color: black;
+    }
+  </style>
 </head>
 <body>
-	<div align="center">
-		<canvas id="3darea" width="240" height="320" style="background-color:#000000">
-		</canvas>
-	</div>
-	<script type="text/javascript">
-	<!--
-			startCopperLichtFromFile('3darea', 'copperlichtdata/index.ccbz', 'Loading $PROGRESS$...<br/><br/><img style="max-width:50%" src="copperlichtdata/coppercubeloadinglogo.png" />', 'Error: This browser does not support WebGL (or it is disabled).<br/>See <a href=\"http://www.ambiera.com/copperlicht/browsersupport.html\">here</a> for details.', false, true, "#000000");
-	-->
-	</script>
-	<br/>
+  <canvas id="3darea"></canvas>
+
+  <script>
+    function resizeCanvas() {
+      const canvas = document.getElementById('3darea');
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      // Stretch canvas to fill entire viewport (ignore aspect ratio)
+      canvas.style.width = vw + 'px';
+      canvas.style.height = vh + 'px';
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = vw * dpr;
+      canvas.height = vh * dpr;
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+    });
+
+    window.addEventListener('load', () => {
+      resizeCanvas();
+      startCopperLichtFromFile(
+        '3darea',
+        'copperlichtdata/index.ccbz',
+        'Loading $PROGRESS$...<br/><br/><img style="max-width:50%" src="copperlichtdata/coppercubeloadinglogo.png" />',
+        'Error: This browser does not support WebGL (or it is disabled).<br/>See <a href="http://www.ambiera.com/copperlicht/browsersupport.html">here</a> for details.',
+        false,
+        true,
+        "#000000"
+      );
+    });
+  </script>
 </body>
 </html>
