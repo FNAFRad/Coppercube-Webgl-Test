@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Juicy GO! 3D – CloudPhone Pause</title>
+  <title>Juicy GO! 3D – Pause Fix</title>
   <script src="copperlichtdata/copperlicht.js"></script>
   <style>
     html, body {
@@ -26,17 +26,17 @@
     let engine = null;
 
     function resizeCanvas() {
-      const c = document.getElementById('3darea');
-      const w = window.innerWidth, h = window.innerHeight;
-      const dpr = window.devicePixelRatio || 1;
-      c.style.width = w+'px'; c.style.height = h+'px';
-      c.width = w * dpr; c.height = h * dpr;
+      const canvas = document.getElementById('3darea');
+      canvas.width = window.innerWidth * window.devicePixelRatio;
+      canvas.height = window.innerHeight * window.devicePixelRatio;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
     }
 
     function pauseGame() {
       if (!engine) return;
-      engine.setTimerEnabled(false);
-      engine.run = false;
+      engine.setTimerEnabled(false); // Stops updates
+      engine.run = false; // Stops rendering
       document.getElementById('cover').style.display = 'block';
       console.log('⏸ Game paused');
     }
@@ -55,24 +55,22 @@
       });
       window.addEventListener('blur', pauseGame);
       window.addEventListener('focus', resumeGame);
-      window.addEventListener('beforeunload', pauseGame);
       window.addEventListener('resize', resizeCanvas);
     }
 
-    window.addEventListener('load', function(){
+    window.addEventListener('load', function () {
       resizeCanvas();
 
       startCopperLichtFromFile(
         '3darea',
         'copperlichtdata/index.ccbz',
         'Loading $PROGRESS$%<br><img src="copperlichtdata/coppercubeloadinglogo.png" style="max-width:50%"/>',
-        'Error: WebGL not supported or disabled.',
-        false, false, "#000000"
+        'Error: WebGL not supported or disabled.'
       );
 
-      const init = setInterval(() => {
+      const wait = setInterval(() => {
         if (CL3D.gCopperLicht && CL3D.gCopperLicht.getScene()) {
-          clearInterval(init);
+          clearInterval(wait);
           engine = CL3D.gCopperLicht;
           setupPauseResume();
         }
