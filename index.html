@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Juicy GO! 3D - Pause Example</title>
+  <title>Juicy GO! 3D - CopperLicht Pause</title>
   <script type="text/javascript" src="copperlichtdata/copperlicht.js"></script>
   <style>
     html, body {
@@ -16,8 +16,8 @@
     }
     canvas {
       display: block;
-      width: 100vw !important;
-      height: 100vh !important;
+      width: 100vw;
+      height: 100vh;
       background-color: black;
     }
   </style>
@@ -30,67 +30,50 @@
 
     function resizeCanvas() {
       const canvas = document.getElementById('3darea');
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      canvas.style.width = vw + 'px';
-      canvas.style.height = vh + 'px';
-
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = vw * dpr;
-      canvas.height = vh * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      canvas.width = window.innerWidth * window.devicePixelRatio;
+      canvas.height = window.innerHeight * window.devicePixelRatio;
     }
 
     function pauseGame() {
       if (!gamePaused) {
         gamePaused = true;
-        console.log("Game paused");
-        toggleAnimations(true);
+        console.log('Game paused');
+        pauseAnimations(true);
       }
     }
 
     function resumeGame() {
       if (gamePaused) {
         gamePaused = false;
-        console.log("Game resumed");
-        toggleAnimations(false);
+        console.log('Game resumed');
+        pauseAnimations(false);
       }
     }
 
-    function toggleAnimations(pause) {
-      const engine = getCopperLicht();
-      if (!engine) return;
-
-      const scene = engine.getScene();
-      if (!scene) return;
-
-      for (let i = 0; i < scene.SceneNodes.length; i++) {
-        const node = scene.SceneNodes[i];
-        if (node && typeof node.animateJoints === 'boolean') {
+    function pauseAnimations(pause) {
+      if (!CL3D.gCopperLicht || !CL3D.gCopperLicht.getScene()) return;
+      const scene = CL3D.gCopperLicht.getScene();
+      scene.SceneNodes.forEach(node => {
+        if (typeof node.animateJoints === 'boolean') {
           node.animateJoints = !pause;
         }
-      }
+      });
     }
 
-    // Custom behavior for controlling logic updates
+    // Behavior class for game logic
     function GameLogicBehavior() {
       this.onAnimate = function(node, timeMs) {
-        if (gamePaused) return true; // Skip logic if paused
-
-        // Add your game logic here
-        // Example: node.Pos.X += 0.01;
-
+        if (gamePaused) return true;
+        // Game logic would go here (e.g. node.Pos.X += 0.01;)
         return true;
       };
     }
 
-    // Handle app visibility and focus changes
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        pauseGame();
-      } else {
-        resumeGame();
-      }
+    // Visibility + Focus Handling
+    document.addEventListener('visibilitychange', () => {
+      document.hidden ? pauseGame() : resumeGame();
     });
 
     window.addEventListener('blur', pauseGame);
@@ -101,27 +84,19 @@
     window.addEventListener('load', function () {
       resizeCanvas();
 
-      // Start the CopperLicht engine
       startCopperLichtFromFile(
         '3darea',
         'copperlichtdata/index.ccbz',
-        'Loading $PROGRESS$...<br/><br/><img style="max-width:50%" src="copperlichtdata/coppercubeloadinglogo.png" />',
-        'Error: This browser does not support WebGL.<br/>See <a href="http://www.ambiera.com/copperlicht/browsersupport.html">here</a> for details.',
-        false,
-        true,
-        "#000000"
+        'Loading $PROGRESS$...<br><img src="copperlichtdata/coppercubeloadinglogo.png" style="max-width:50%"/>',
+        'Error: WebGL not supported or disabled.'
       );
 
-      // Wait until the engine is fully initialized
-      let checkInit = setInterval(() => {
-        const engine = getCopperLicht();
-        if (engine && engine.getScene()) {
-          clearInterval(checkInit);
-
-          const scene = engine.getScene();
+      // Wait for CopperLicht to load properly before applying behavior
+      const waitForEngine = setInterval(() => {
+        if (CL3D.gCopperLicht && CL3D.gCopperLicht.getScene()) {
+          clearInterval(waitForEngine);
+          const scene = CL3D.gCopperLicht.getScene();
           const root = scene.getRootSceneNode();
-
-          // Attach behavior to root node (or any node you want)
           root.addBehavior(new GameLogicBehavior());
         }
       }, 100);
