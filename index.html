@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Juicy GO! 3D - Interrupt Handling</title>
+  <title>Juicy GO! 3D - Pause Example</title>
   <script type="text/javascript" src="copperlichtdata/copperlicht.js"></script>
   <style>
     html, body {
@@ -28,7 +28,6 @@
   <script>
     let gamePaused = false;
 
-
     function resizeCanvas() {
       const canvas = document.getElementById('3darea');
       const vw = window.innerWidth;
@@ -42,68 +41,91 @@
       canvas.height = vh * dpr;
     }
 
-    // Pause the game: freeze animations and game logic
     function pauseGame() {
       if (!gamePaused) {
         gamePaused = true;
         console.log("Game paused");
-        // Example of pausing the CopperLicht engine (you'll need to adapt it to your game logic)
-        // copperLichtEngine.pause();
+        toggleAnimations(true);
       }
     }
 
-    // Resume the game: resume animations and game logic
     function resumeGame() {
       if (gamePaused) {
         gamePaused = false;
         console.log("Game resumed");
-        // Example of resuming the CopperLicht engine (you'll need to adapt it)
-        // copperLichtEngine.play();
+        toggleAnimations(false);
       }
     }
 
-    // Handle app visibility change (e.g., app is in background or foreground)
-    document.addEventListener('visibilitychange', function() {
+    function toggleAnimations(pause) {
+      const engine = getCopperLicht();
+      if (!engine) return;
+
+      const scene = engine.getScene();
+      if (!scene) return;
+
+      for (let i = 0; i < scene.SceneNodes.length; i++) {
+        const node = scene.SceneNodes[i];
+        if (node && typeof node.animateJoints === 'boolean') {
+          node.animateJoints = !pause;
+        }
+      }
+    }
+
+    // Custom behavior for controlling logic updates
+    function GameLogicBehavior() {
+      this.onAnimate = function(node, timeMs) {
+        if (gamePaused) return true; // Skip logic if paused
+
+        // Add your game logic here
+        // Example: node.Pos.X += 0.01;
+
+        return true;
+      };
+    }
+
+    // Handle app visibility and focus changes
+    document.addEventListener('visibilitychange', function () {
       if (document.hidden) {
-        pauseGame();  // Pause when app goes to the background
+        pauseGame();
       } else {
-        resumeGame();  // Resume when app comes to the foreground
+        resumeGame();
       }
     });
 
-    // Handle window focus/blur events (e.g., switching to another tab)
-    window.addEventListener('blur', function() {
-      pauseGame();  // Pause when the app loses focus
-    });
+    window.addEventListener('blur', pauseGame);
+    window.addEventListener('focus', resumeGame);
+    window.addEventListener('beforeunload', pauseGame);
+    window.addEventListener('resize', resizeCanvas);
 
-    window.addEventListener('focus', function() {
-      resumeGame();  // Resume when the app gains focus
-    });
+    window.addEventListener('load', function () {
+      resizeCanvas();
 
-    // Handle window unload event (e.g., when user exits the app)
-    window.addEventListener('beforeunload', function() {
-      pauseGame();  // Pause the game before the page is unloaded
-    });
-
-    // Handle window resizing
-    window.addEventListener('resize', function() {
-      resizeCanvas();  // Resize canvas when the window is resized
-    });
-
-    window.addEventListener('load', function() {
-      resizeCanvas();  // Initialize canvas size on load
-      // Start your CopperLicht game engine or whatever you’re using
+      // Start the CopperLicht engine
       startCopperLichtFromFile(
         '3darea',
         'copperlichtdata/index.ccbz',
         'Loading $PROGRESS$...<br/><br/><img style="max-width:50%" src="copperlichtdata/coppercubeloadinglogo.png" />',
-        'Error: This browser does not support WebGL (or it is disabled).<br/>See <a href="http://www.ambiera.com/copperlicht/browsersupport.html">here</a> for details.',
+        'Error: This browser does not support WebGL.<br/>See <a href="http://www.ambiera.com/copperlicht/browsersupport.html">here</a> for details.',
         false,
         true,
         "#000000"
       );
-    });
 
+      // Wait until the engine is fully initialized
+      let checkInit = setInterval(() => {
+        const engine = getCopperLicht();
+        if (engine && engine.getScene()) {
+          clearInterval(checkInit);
+
+          const scene = engine.getScene();
+          const root = scene.getRootSceneNode();
+
+          // Attach behavior to root node (or any node you want)
+          root.addBehavior(new GameLogicBehavior());
+        }
+      }, 100);
+    });
   </script>
 </body>
 </html>
