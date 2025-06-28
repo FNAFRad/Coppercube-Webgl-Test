@@ -3,18 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Juicy GO! 3D – Pause Fix</title>
+  <title>Juicy GO! 3D – Mobile Pause & Reload</title>
   <script src="copperlichtdata/copperlicht.js"></script>
   <style>
     html, body {
-      margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background:black;
+      margin:0; padding:0;
+      width:100vw; height:100vh;
+      overflow:hidden; background:black;
     }
     canvas {
-      width:100vw !important; height:100vh !important; background:black;
+      width:100vw !important;
+      height:100vh !important;
+      background:black;
     }
     #cover {
-      position:absolute; top:0; left:0; width:100vw; height:100vh;
-      background:black; display:none; z-index:999;
+      position:absolute;
+      top:0; left:0;
+      width:100vw; height:100vh;
+      background:black;
+      display:none;
+      z-index:9999;
     }
   </style>
 </head>
@@ -26,30 +34,27 @@
     let engine = null;
 
     function resizeCanvas() {
-      const canvas = document.getElementById('3darea');
-      canvas.width = window.innerWidth * window.devicePixelRatio;
-      canvas.height = window.innerHeight * window.devicePixelRatio;
-      canvas.style.width = window.innerWidth + 'px';
-      canvas.style.height = window.innerHeight + 'px';
+      const c = document.getElementById('3darea');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      c.style.width = w + 'px';
+      c.style.height = h + 'px';
+      c.width = w * dpr;
+      c.height = h * dpr;
     }
 
     function pauseGame() {
-      if (!engine) return;
-      engine.setTimerEnabled(false); // Stops updates
-      engine.run = false; // Stops rendering
       document.getElementById('cover').style.display = 'block';
-      console.log('⏸ Game paused');
+      console.log('⏸ Paused – overlay shown');
     }
 
     function resumeGame() {
-      if (!engine) return;
-      engine.setTimerEnabled(true);
-      engine.run = true;
-      document.getElementById('cover').style.display = 'none';
-      console.log('▶ Game resumed');
+      console.log('▶ Resuming – reloading page to avoid context issues');
+      location.reload();
     }
 
-    function setupPauseResume() {
+    function setupListeners() {
       document.addEventListener('visibilitychange', () => {
         document.hidden ? pauseGame() : resumeGame();
       });
@@ -58,21 +63,21 @@
       window.addEventListener('resize', resizeCanvas);
     }
 
-    window.addEventListener('load', function () {
+    window.addEventListener('load', () => {
       resizeCanvas();
 
       startCopperLichtFromFile(
         '3darea',
         'copperlichtdata/index.ccbz',
-        'Loading $PROGRESS$%<br><img src="copperlichtdata/coppercubeloadinglogo.png" style="max-width:50%"/>',
-        'Error: WebGL not supported or disabled.'
+        'Loading $PROGRESS$%<br><img src="copperlichtdata/coppercubeloadinglogo.png" style="max-width:50%" />',
+        'Error: WebGL not supported.'
       );
 
-      const wait = setInterval(() => {
+      const waitInit = setInterval(() => {
         if (CL3D.gCopperLicht && CL3D.gCopperLicht.getScene()) {
-          clearInterval(wait);
+          clearInterval(waitInit);
           engine = CL3D.gCopperLicht;
-          setupPauseResume();
+          setupListeners();
         }
       }, 100);
     });
